@@ -52,13 +52,22 @@ function initializeApp() {
     if (exportBtn) exportBtn.addEventListener('click', exportQuotes);
     const importInput = document.getElementById('importFile');
     if (importInput) importInput.addEventListener('change', importFromJsonFile);
-    // Show last viewed quote if available
-    const last = loadLastViewedQuote();
-    if (last) {
-        displayQuote(last.text, last.author, last.category);
-    } else {
-        showRandomQuote();
+    // Populate filter dropdown
+    populateCategories();
+    // Restore last filter
+    const lastFilter = localStorage.getItem('lastCategoryFilter') || 'all';
+    const filterSelect = document.getElementById('categoryFilter');
+    if (filterSelect) {
+        filterSelect.value = lastFilter;
     }
+    filterQuotes();
+    // Show last viewed quote if available (optional, can be removed if filter takes precedence)
+    // const last = loadLastViewedQuote();
+    // if (last) {
+    //     displayQuote(last.text, last.author, last.category);
+    // } else {
+    //     showRandomQuote();
+    // }
 }
 
 // Function to display a random quote
@@ -218,25 +227,22 @@ function addQuote() {
     // Display the new quote
     displayQuote(newQuote.text, newQuote.author, newQuote.category);
     saveQuotes();
+    populateCategories();
 }
 
 // Function to update category dropdown
 function updateCategoryDropdown() {
-    // Get unique categories
     const categories = [...new Set(quotes.map(quote => quote.category))];
-    
-    // Clear existing options except "All Categories"
     while (categorySelect.children.length > 1) {
         categorySelect.removeChild(categorySelect.lastChild);
     }
-    
-    // Add category options
     categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category;
         option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
         categorySelect.appendChild(option);
     });
+    populateCategories();
 }
 
 // Function to show notifications
@@ -370,4 +376,54 @@ function importFromJsonFile(event) {
         }
     };
     fileReader.readAsText(file);
-} 
+}
+
+// --- Category Filtering System ---
+function populateCategories() {
+    const filterSelect = document.getElementById('categoryFilter');
+    if (!filterSelect) return;
+    // Get unique categories
+    const categories = [...new Set(quotes.map(q => q.category))];
+    // Save current selection
+    const prevValue = filterSelect.value;
+    // Remove all except 'all'
+    while (filterSelect.children.length > 1) {
+        filterSelect.removeChild(filterSelect.lastChild);
+    }
+    // Add categories
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        filterSelect.appendChild(option);
+    });
+    // Restore previous selection if possible
+    if (categories.includes(prevValue)) {
+        filterSelect.value = prevValue;
+    } else {
+        filterSelect.value = 'all';
+    }
+}
+
+function filterQuotes() {
+    const filterSelect = document.getElementById('categoryFilter');
+    const selected = filterSelect ? filterSelect.value : 'all';
+    // Save filter to localStorage
+    localStorage.setItem('lastCategoryFilter', selected);
+    // Filter and display quotes
+    let filteredQuotes = quotes;
+    if (selected !== 'all') {
+        filteredQuotes = quotes.filter(q => q.category === selected);
+    }
+    if (filteredQuotes.length === 0) {
+        displayQuote('No quotes available for this category.', 'System', selected);
+        return;
+    }
+    // Show a random quote from filtered
+    const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+    const randomQuote = filteredQuotes[randomIndex];
+    displayQuote(randomQuote.text, randomQuote.author, randomQuote.category);
+}
+
+// Make filterQuotes globally accessible
+window.filterQuotes = filterQuotes; 

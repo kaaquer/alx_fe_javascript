@@ -18,6 +18,15 @@
             </select>
         </div>
         
+        <!-- Category Filter Dropdown -->
+        <div class="category-filter-section" style="margin-bottom: 20px;">
+            <label for="categoryFilter">Filter by Category:</label>
+            <select id="categoryFilter" onchange="filterQuotes()">
+                <option value="all">All Categories</option>
+                <!-- Categories will be populated dynamically -->
+            </select>
+        </div>
+        
         <!-- Quote Display Area -->
         <div id="quoteDisplay" class="quote-display">
             <p class="quote-text">Click "Show New Quote" to get started!</p>
