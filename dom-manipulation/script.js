@@ -484,8 +484,10 @@ async function syncQuotes() {
     filterQuotes();
     if (conflicts > 0 || added > 0) {
         showSyncNotification(`Sync complete. ${added} new, ${conflicts} conflicts resolved (server wins).`, 'success');
+        alert('Quotes synced with server!');
     } else {
         showSyncNotification('Sync complete. No changes.', 'success');
+        alert('Quotes synced with server!');
     }
 }
 
