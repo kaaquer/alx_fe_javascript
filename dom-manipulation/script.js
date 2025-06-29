@@ -426,4 +426,81 @@ function filterQuotes() {
 }
 
 // Make filterQuotes globally accessible
-window.filterQuotes = filterQuotes; 
+window.filterQuotes = filterQuotes;
+
+// --- Server Sync Simulation ---
+const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts'; // Simulated endpoint
+const SYNC_INTERVAL = 30000; // 30 seconds
+
+function showSyncNotification(message, type = 'info') {
+    const notif = document.getElementById('syncNotification');
+    if (!notif) return;
+    notif.textContent = message;
+    notif.style.color = type === 'error' ? 'red' : (type === 'success' ? 'green' : '#333');
+    notif.style.fontWeight = 'bold';
+    setTimeout(() => { notif.textContent = ''; }, 5000);
+}
+
+async function fetchServerQuotes() {
+    try {
+        const res = await fetch(SERVER_URL);
+        if (!res.ok) throw new Error('Server error');
+        // Simulate server quotes as array of {text, author, category}
+        const data = await res.json();
+        // We'll only use the first 10 for demo, and map to our structure
+        return data.slice(0, 10).map(post => ({
+            text: post.title,
+            author: 'Server',
+            category: 'server'
+        }));
+    } catch (e) {
+        showSyncNotification('Failed to fetch from server.', 'error');
+        return [];
+    }
+}
+
+async function syncWithServer() {
+    showSyncNotification('Syncing with server...');
+    const serverQuotes = await fetchServerQuotes();
+    if (!serverQuotes.length) return;
+    let conflicts = 0, added = 0;
+    // Merge: if a quote with same text exists, server wins
+    serverQuotes.forEach(serverQ => {
+        const localIdx = quotes.findIndex(q => q.text === serverQ.text);
+        if (localIdx !== -1) {
+            // Conflict: overwrite local with server
+            if (JSON.stringify(quotes[localIdx]) !== JSON.stringify(serverQ)) {
+                quotes[localIdx] = serverQ;
+                conflicts++;
+            }
+        } else {
+            quotes.push(serverQ);
+            added++;
+        }
+    });
+    saveQuotes();
+    updateCategoryDropdown();
+    populateCategories();
+    filterQuotes();
+    if (conflicts > 0 || added > 0) {
+        showSyncNotification(`Sync complete. ${added} new, ${conflicts} conflicts resolved (server wins).`, 'success');
+    } else {
+        showSyncNotification('Sync complete. No changes.', 'success');
+    }
+}
+
+// Periodic sync
+setInterval(syncWithServer, SYNC_INTERVAL);
+
+// Sync Now button
+const syncNowBtn = document.getElementById('syncNow');
+if (syncNowBtn) syncNowBtn.addEventListener('click', syncWithServer);
+
+// Optionally, POST new quotes to server (not required for mock, but can be added for realism)
+// async function postQuoteToServer(quote) {
+//     await fetch(SERVER_URL, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(quote)
+//     });
+// } 
