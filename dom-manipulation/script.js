@@ -42,14 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Set up event listeners
+    createAddQuoteForm();
     newQuoteBtn.addEventListener('click', showRandomQuote);
     addQuoteBtn.addEventListener('click', showAddQuoteForm);
-    
-    // Initialize category dropdown
     updateCategoryDropdown();
-    
-    // Show initial quote
     showRandomQuote();
 }
 
@@ -116,24 +112,58 @@ function displayQuote(text, author, category) {
     }, 500);
 }
 
+// Function to create the add quote form dynamically
+function createAddQuoteForm() {
+    const container = document.getElementById('addQuoteFormContainer');
+    if (!container) return;
+    
+    // Create form wrapper
+    const form = document.createElement('div');
+    form.id = 'addQuoteForm';
+    form.className = 'add-quote-form';
+    form.style.display = 'none';
+
+    // Form inner HTML
+    form.innerHTML = `
+        <h3>Add New Quote</h3>
+        <div class="form-group">
+            <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+        </div>
+        <div class="form-group">
+            <input id="newQuoteAuthor" type="text" placeholder="Enter quote author" />
+        </div>
+        <div class="form-group">
+            <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+        </div>
+        <div class="form-actions">
+            <button id="addQuoteSubmit" class="btn btn-success">Add Quote</button>
+            <button id="addQuoteCancel" class="btn btn-cancel">Cancel</button>
+        </div>
+    `;
+    container.appendChild(form);
+
+    // Add event listeners for buttons
+    document.getElementById('addQuoteSubmit').onclick = addQuote;
+    document.getElementById('addQuoteCancel').onclick = hideAddQuoteForm;
+}
+
 // Function to show the add quote form
 function showAddQuoteForm() {
+    const addQuoteForm = document.getElementById('addQuoteForm');
+    if (!addQuoteForm) return;
     addQuoteForm.style.display = 'block';
     addQuoteForm.classList.add('slide-in');
-    
-    // Focus on first input
     document.getElementById('newQuoteText').focus();
 }
 
 // Function to hide the add quote form
 function hideAddQuoteForm() {
+    const addQuoteForm = document.getElementById('addQuoteForm');
+    if (!addQuoteForm) return;
     addQuoteForm.classList.add('slide-out');
-    
     setTimeout(() => {
         addQuoteForm.style.display = 'none';
         addQuoteForm.classList.remove('slide-in', 'slide-out');
-        
-        // Clear form inputs
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteAuthor').value = '';
         document.getElementById('newQuoteCategory').value = '';
@@ -248,4 +278,8 @@ document.addEventListener('keydown', function(event) {
         event.preventDefault();
         showRandomQuote();
     }
-}); 
+});
+
+// Ensure addQuote is globally accessible
+window.addQuote = addQuote;
+window.hideAddQuoteForm = hideAddQuoteForm; 

@@ -30,23 +30,8 @@
             <button id="addQuoteBtn" class="btn btn-secondary">Add New Quote</button>
         </div>
         
-        <!-- Add Quote Form (initially hidden) -->
-        <div id="addQuoteForm" class="add-quote-form" style="display: none;">
-            <h3>Add New Quote</h3>
-            <div class="form-group">
-                <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-            </div>
-            <div class="form-group">
-                <input id="newQuoteAuthor" type="text" placeholder="Enter quote author" />
-            </div>
-            <div class="form-group">
-                <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-            </div>
-            <div class="form-actions">
-                <button onclick="addQuote()" class="btn btn-success">Add Quote</button>
-                <button onclick="hideAddQuoteForm()" class="btn btn-cancel">Cancel</button>
-            </div>
-        </div>
+        <!-- Add Quote Form will be created dynamically by JS -->
+        <div id="addQuoteFormContainer"></div>
     </div>
     
     <script src="script.js"></script>
