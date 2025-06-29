@@ -441,7 +441,7 @@ function showSyncNotification(message, type = 'info') {
     setTimeout(() => { notif.textContent = ''; }, 5000);
 }
 
-async function fetchServerQuotes() {
+async function fetchQuotesFromServer() {
     try {
         const res = await fetch(SERVER_URL);
         if (!res.ok) throw new Error('Server error');
@@ -459,9 +459,9 @@ async function fetchServerQuotes() {
     }
 }
 
-async function syncWithServer() {
+async function syncQuotes() {
     showSyncNotification('Syncing with server...');
-    const serverQuotes = await fetchServerQuotes();
+    const serverQuotes = await fetchQuotesFromServer();
     if (!serverQuotes.length) return;
     let conflicts = 0, added = 0;
     // Merge: if a quote with same text exists, server wins
@@ -490,11 +490,15 @@ async function syncWithServer() {
 }
 
 // Periodic sync
-setInterval(syncWithServer, SYNC_INTERVAL);
+setInterval(syncQuotes, SYNC_INTERVAL);
 
 // Sync Now button
 const syncNowBtn = document.getElementById('syncNow');
-if (syncNowBtn) syncNowBtn.addEventListener('click', syncWithServer);
+if (syncNowBtn) syncNowBtn.addEventListener('click', syncQuotes);
+
+// Make syncQuotes and fetchQuotesFromServer globally accessible
+window.syncQuotes = syncQuotes;
+window.fetchQuotesFromServer = fetchQuotesFromServer;
 
 // Optionally, POST new quotes to server (not required for mock, but can be added for realism)
 // async function postQuoteToServer(quote) {
